@@ -23,7 +23,7 @@ function source.is_available()
 end
 
 function source.get_debug_name()
-	return "css-variables"
+	return "css_variables"
 end
 
 function source.get_trigger_characters()
@@ -56,7 +56,7 @@ function source.execute(_, completion_item, callback)
 	callback(completion_item)
 end
 
-require("cmp").register_source("css-variables", source.new())
+require("cmp").register_source("css_variables", source.new())
 
 return {
 	setup = function(_opts)
