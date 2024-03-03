@@ -5,7 +5,7 @@ local opts = {
 	files = {},
 }
 
-function source.new()
+source.new = function()
 	local self = setmetatable({}, { __index = source })
 	self.cache = {}
 	return self
@@ -21,10 +21,6 @@ function source.is_available()
 				or vim.bo.filetype == "vue"
 			)
 end
-
--- function source.get_keyword_pattern()
--- 	return [[\%(\$_\w*\|\%(\w\|\.\)*\)]]
--- end
 
 function source.get_debug_name()
 	return "css-variables"
@@ -59,6 +55,8 @@ end
 function source.execute(_, completion_item, callback)
 	callback(completion_item)
 end
+
+require("cmp").register_source("css-variables", source.new())
 
 return {
 	setup = function(_opts)
