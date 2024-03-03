@@ -1,6 +1,10 @@
 local source = {}
 local utils = require("cmp_css_variables.utils")
 
+local opts = {
+	files = {},
+}
+
 function source.new()
 	local self = setmetatable({}, { __index = source })
 	self.cache = {}
@@ -34,9 +38,7 @@ function source.complete(self, _, callback)
 	local items = {}
 
 	if not self.cache[bufnr] then
-		if vim.g.css_variables_files then
-			items = utils.get_css_variables(vim.g.css_variables_files)
-		end
+		items = utils.get_css_variables(opts.files)
 
 		if type(items) ~= "table" then
 			return callback()
@@ -57,4 +59,10 @@ function source.execute(_, completion_item, callback)
 	callback(completion_item)
 end
 
-return source
+return {
+	setup = function(_opts)
+		if _opts then
+			opts = vim.tbl_deep_extend("force", opts, _opts) -- will extend the default options
+		end
+	end,
+}
