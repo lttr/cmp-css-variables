@@ -59,7 +59,6 @@ function M.get_css_variables(files)
 					})
 				end
 			end
-			d
 		end
 	end
 
