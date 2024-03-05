@@ -27,27 +27,53 @@ function M.get_css_variables(files)
 	local variables = {}
 	local used = {}
 
-	vim.print(type(files))
-
 	for _, file in ipairs(files) do
-		local content = vim.fn.readfile(M.join_paths(vim.fn.getcwd(), file))
-		for index, line in ipairs(content or {}) do
-			local name, value = line:match("^%s*[-][-](.*):(.*)[;]")
-			if name and not used[name] then
-				local lineBefore = content[index - 1]
-				local comment = lineBefore:match("%s*/[*](.*)[*]/")
-				table.insert(variables, {
-					label = "--" .. name,
-					insertText = "var(--" .. name .. ")",
-					kind = cmp.lsp.CompletionItemKind.Variable,
-					documentation = comment and value .. "\n\n" .. comment or value,
-				})
-				used[name] = true
+		local file_path = M.join_paths(vim.fn.getcwd(), file)
+		if M.file_exists(file_path) then
+			local content = vim.fn.readfile(file_path)
+
+			-- Regex for matching CSS custom properties declarations:
+			-- avoids matching variables that start with '_'
+			-- -> I expect those are private
+			-- avoids matching variables with default values set (contains ',')
+			-- -> I expect those are usages, not declaration
+			-- avoids matching anything after ';' or '}'
+			-- -> I expect those characters mark end of declaration
+			local regexp = "[-][-]([^_][^:,]*):([^;}]+);"
+
+			for index, line in ipairs(content or {}) do
+				for name, value in string.gmatch(line, regexp) do
+					print(string.find(line, name))
+					local lineBefore = content[index - 1]
+					local comment = nil
+					if lineBefore then
+						comment = lineBefore:match("%s*/[*](.*)[*]/")
+					end
+					local file_name_from_file_path = file:match("([^/]+)$")
+					local docs = value .. "\n\n" .. (comment and comment .. "\n\n" or "") .. file_name_from_file_path
+					table.insert(variables, {
+						label = "--" .. name,
+						insertText = "--" .. name,
+						kind = cmp.lsp.CompletionItemKind.Variable,
+						documentation = docs,
+					})
+				end
 			end
+			d
 		end
 	end
 
 	return variables
+end
+
+M.file_exists = function(name)
+	local f = io.open(name, "r")
+	if f ~= nil then
+		io.close(f)
+		return true
+	else
+		return false
+	end
 end
 
 -- function M.find_files(path)
