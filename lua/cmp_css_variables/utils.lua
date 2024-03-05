@@ -43,7 +43,6 @@ function M.get_css_variables(files)
 
 			for index, line in ipairs(content or {}) do
 				for name, value in string.gmatch(line, regexp) do
-					print(string.find(line, name))
 					local lineBefore = content[index - 1]
 					local comment = nil
 					if lineBefore then
